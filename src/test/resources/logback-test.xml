@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{5} - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<!-- only use debug level for our own code -->
+	<logger name="com.testbirds.selenium.techstack" level="DEBUG" />
+
+	<!-- only use the ReportPortalAppender if the uuid is defined -->
+	<if condition='isDefined("rp.uuid")'>
+		<then>
+			<appender name="ReportPortalAppender" class="com.epam.reportportal.logback.appender.ReportPortalAppender">
+				<encoder>
+					<pattern>[SLF4J] %-5level %logger{5} - %msg%n</pattern>
+				</encoder>
+			</appender>
+
+			<root level="INFO">
+				<appender-ref ref="STDOUT" />
+				<appender-ref ref="ReportPortalAppender" />
+			</root>
+		</then>
+		<else>
+			<root level="INFO">
+				<appender-ref ref="STDOUT" />
+			</root>
+		</else>
+	</if>
+
+	<!-- proper java.util.logging to SLF4J redirection -->
+	<contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator" />
+</configuration>
