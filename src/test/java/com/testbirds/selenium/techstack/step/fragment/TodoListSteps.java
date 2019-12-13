@@ -1,7 +1,9 @@
 package com.testbirds.selenium.techstack.step.fragment;
 
+import static com.codeborne.selenide.Selenide.Wait;
 import static com.codeborne.selenide.Selenide.actions;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -11,15 +13,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.ElementsCollection;
+import com.codeborne.selenide.SelenideElement;
 import com.testbirds.selenium.techstack.model.dto.LocalStorageItem;
 import com.testbirds.selenium.techstack.model.fragment.TodoList;
 import com.testbirds.selenium.techstack.step.service.TodoListManipulationService;
 
-import cucumber.api.java.After;
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.Then;
-import cucumber.api.java.en.When;
+import io.cucumber.java.After;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
 
 public class TodoListSteps extends AbstractFragmentSteps<TodoList> {
 
@@ -141,49 +145,93 @@ public class TodoListSteps extends AbstractFragmentSteps<TodoList> {
         }
     }
 
-    /**
-     * Hovering the Todo list item can be a real pain on all browsers. This helper
-     * gets it done in any case.
-     *
-     * @param item the item to hover.
-     */
-    private void hoverTodoListItem(final TodoList.Item item) {
-        // Hovering two elements was needed for Firefox to actually hover
-        // -> after deleting one, the second is on the same postion
-        item.getCheckbox().hover();
-        item.getLabelElement().hover();
-        // IE get's some issues with just "hover"
-        actions().moveToElement(item.getLabelElement().toWebElement()).perform();
-        // wait for the delete button to be visible, to verify the hover worked
-        item.getDeleteButton().shouldBe(Condition.visible);
-    }
-
     @When("^I change the (\\d+)(?:st|nd|rd|th) item in the todo list to read \"([^\"]+)\"")
     public void changeItemAtPosition(int position, String text) {
         TodoList.Item item = getFragment().getItemByPosition(position);
-        hoverTodoListItem(item);
         item.getLabelElement().doubleClick();
-        LOG.warn("After this doubleClick, safari still doesn't show the edit");
-        // FIXME: does not work on Safari
-        // item.getEditInput().sendKeys(Keys.chord(Keys.COMMAND, "a"));
-        item.getEditInput().sendKeys(Keys.chord(Keys.CONTROL, "a"));
+        if ("safari".equals(Configuration.browser)) {
+            LOG.warn("Known Bug: After this doubleClick, safari still doesn't show the edit");
+            // FIXME: does not work on Safari
+            item.getEditInput().sendKeys(Keys.chord(Keys.COMMAND, "a"));
+        } else {
+            item.getEditInput().sendKeys(Keys.chord(Keys.CONTROL, "a"));
+        }
         item.getEditInput().sendKeys(Keys.DELETE);
         item.getEditInput().sendKeys(text);
         item.getEditInput().pressEnter();
     }
 
+    /**
+     * Helper to improve hovering on Microsoft browsers (IE and Edge).
+     *
+     * @param element the element to hover.
+     */
+    private void hover(final SelenideElement element) {
+        element.hover();
+
+        // Microsoft browsers don't work well with .hover(), so use actions additionally
+        if ("ie".equals(Configuration.browser) || "edge".equals(Configuration.browser)) {
+            actions().moveToElement(element.toWebElement()).perform();
+
+            // extra sleep since onMouseOver events can take time to process
+            try {
+                Thread.sleep(1000L);
+            } catch (final InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    /**
+     * When deleting a Todo list item, the item needs to be hovered to make the
+     * delete button appear. Only after it appeared, it can be clicked. This leads
+     * to tricky timing situations on most browsers.
+     *
+     * @param item the item to delete.
+     */
+    private void deleteTodoListItem(final TodoList.Item item) {
+        // Hovering two elements was needed for many browsers (e.g. Firefox) to hover
+        // -> after deleting one item, the second item is on the same position
+        // -> therefore, the cursor was not really moved at all and hovering failed
+        // Solution: we hover the new Headline first and then the label of the item
+        hover(getFragment().getHeadline());
+
+        // wait for the element to disappear in case it is still there (i.e. from
+        // previous hover and delete)
+        Wait().ignoring(Throwable.class).withTimeout(Duration.ofMillis(Configuration.timeout))
+                .until(x -> item.getDeleteButton().is(Condition.hidden));
+
+        // hover the label finally
+        hover(item.getLabelElement());
+
+        if ("ie".equals(Configuration.browser)) {
+            // IE has to do click it with this hacky actions() sequences
+            actions()
+                    // move the cursor to the hidden delete button (cheating, but works)
+                    .moveToElement(item.getDeleteButton().toWebElement())
+                    // the delete button needs to appear first (takes around ~400ms, use more)
+                    .pause(Duration.ofMillis(1000L))
+                    // click the delete button which should have appeared now
+                    .click()
+                    // perform as a single action, to avoid network delays messing it up
+                    .perform();
+        } else {
+            // wait explicitly for the delete button to appear and click it
+            item.getDeleteButton().waitUntil(Condition.visible, Configuration.timeout);
+            item.getDeleteButton().click();
+        }
+    }
+
     @When("^I delete \"([^\"]+)\" from the todo list$")
     public void deleteItem(String text) {
         TodoList.Item item = getFragment().getItemByText(text);
-        hoverTodoListItem(item);
-        item.getDeleteButton().click();
+        deleteTodoListItem(item);
     }
 
     @When("^I delete the (\\d+)(?:st|nd|rd|th) item from the todo list$")
     public void deleteItemAtPosition(int position) {
         TodoList.Item item = getFragment().getItemByPosition(position);
-        hoverTodoListItem(item);
-        item.getDeleteButton().click();
+        deleteTodoListItem(item);
     }
 
     @When("^I delete (\\d+) item(?:s)? from the todo list$")

@@ -30,6 +30,7 @@ Feature: Add Items to Todo List
       | 1             | 9                       | 10                 |
       | 5             | 5                       | 10                 |
 
+  @smoke
   Scenario: New Items are added at End of List
     Given I have a todo list with 2 items
     And the 1st item in the todo list reads "buy milk"

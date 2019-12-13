@@ -5,8 +5,8 @@ import static com.codeborne.selenide.Selenide.clearBrowserLocalStorage;
 
 import com.testbirds.selenium.techstack.model.page.TodoMVC;
 
-import cucumber.api.java.en.Given;
-import cucumber.api.java.en.When;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.When;
 
 public class TodoMVCSteps extends AbstractPageSteps<TodoMVC> {
 
@@ -14,6 +14,7 @@ public class TodoMVCSteps extends AbstractPageSteps<TodoMVC> {
         super(TodoMVC.class);
     }
 
+    @Override
     @Given("I am on the TodoMVC page")
     public void loadPage() {
         super.loadPage();

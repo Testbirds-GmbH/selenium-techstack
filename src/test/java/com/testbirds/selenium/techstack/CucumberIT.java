@@ -22,12 +22,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.testbirds.selenium.techstack.util.JacksonHelper;
 import com.testbirds.selenium.techstack.util.ReportPortalSelenideListener;
 
-import cucumber.api.CucumberOptions;
-import cucumber.api.junit.Cucumber;
+import io.cucumber.junit.Cucumber;
+import io.cucumber.junit.CucumberOptions;
 
 @RunWith(Cucumber.class)
 @CucumberOptions(
-        plugin = { "json:target/cucumber-report.json", "com.testbirds.selenium.techstack.util.ReportPortalScenarioReporter" },
+        plugin = { "pretty", "json:target/cucumber-report.json",
+                "com.testbirds.selenium.techstack.util.ReportPortalScenarioReporter" },
         features = "classpath:/feature/",
         glue = "com.testbirds.selenium.techstack.step",
         monochrome = true)
@@ -49,7 +50,7 @@ public class CucumberIT {
         Configuration.reportsFolder = Paths.get("target", "selenide-reports").toString();
 
         // load extra capabilities from a json file
-        final DesiredCapabilities extraCapabilitiess = new DesiredCapabilities();
+        final DesiredCapabilities extraCapabilities = new DesiredCapabilities();
         final File capabilitiesFile = new File("capabilities.json");
         if (capabilitiesFile.exists()) {
             try {
@@ -59,7 +60,7 @@ public class CucumberIT {
                         });
                 capabilities.forEach((capability, value) -> {
                     LOG.debug("Set extra capability {} to {}", capability, value);
-                    extraCapabilitiess.setCapability(capability, value);
+                    extraCapabilities.setCapability(capability, value);
                 });
             } catch (final IOException e) {
                 LOG.error("Failed to load capabilities from file {}", capabilitiesFile, e);
@@ -67,7 +68,7 @@ public class CucumberIT {
         } else {
             LOG.info("You can set extra capabilities in {}", capabilitiesFile);
         }
-        Configuration.browserCapabilities = extraCapabilitiess;
+        Configuration.browserCapabilities = extraCapabilities;
 
         // set Configuration.fastSetValue to true on Internet Explorer
         if ("ie".equals(Configuration.browser)) {

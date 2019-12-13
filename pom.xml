@@ -14,11 +14,11 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.test.failure.ignore>true</maven.test.failure.ignore>
-		<selenide.version>5.2.3</selenide.version>
-		<cucumber.version>4.3.1</cucumber.version>
-		<slf4j.version>1.7.26</slf4j.version>
+		<selenide.version>5.4.1</selenide.version>
+		<cucumber.version>4.7.4</cucumber.version>
+		<slf4j.version>1.7.28</slf4j.version>
 		<logback.version>1.2.3</logback.version>
-		<janino.version>3.0.7</janino.version>
+		<janino.version>3.0.15</janino.version>
 		<reportportalCucumberAgent.version>4.1.0</reportportalCucumberAgent.version>
 		<reportportalLogbackAgent.version>4.0.2</reportportalLogbackAgent.version>
 	</properties>
@@ -115,7 +115,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
-				<version>2.22.1</version>
+				<version>2.22.2</version>
 				<configuration>
 					<systemPropertiesFile>failsafe.properties</systemPropertiesFile>
 				</configuration>

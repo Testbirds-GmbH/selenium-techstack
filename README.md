@@ -3,6 +3,7 @@
 With this project we've created an exemplary comprehensive technology stack for website testing based on Selenium.
 Our goal was to demonstrate how easy it is to construct a proper tech stack that supports all related process steps, from test case creation, over execution, to reporting, just using open source resources.
 This tech stack has been first presented at the [German Testing Day 2019](https://www.germantestingday.info/german-testing-day-2019/programm/konferenzprogramm/sessiondetails/action/detail/session/gtd-35-2/title/ein-vollstaendiger-selenium-techstack-von-der-konzeption-bis-zur-auswertung-mit-open-source-softwar.html) and may be used as starting point or inspiration for other (in particular your own) testing projects.
+You can read more about the background of this Techstack and the contents of the presentation in our [Blog article about the Selenium Techstack](https://www.testbirds.com/blog/selenium-tech-stack-open-source/).
 
 Authors:
 * [Robert Bossek](https://github.com/robasek)
@@ -60,11 +61,8 @@ If the `selenide.remote` property is set, Selenide will use a Selenium Grid with
 
 For example, you could start a Selenium Hub on the local host and then reference it with `selenide.remote=http://localhost:4444/wd/hub`.
 
-Cloud providers can be used, too.
-For example, you can use the [Testbirds Device Cloud](https://www.testbirds.com/device-cloud/device-cloud-overview/) with these steps:
-1. Register an account for the free trial or use your existing account
-2. [Setup the Testbirds Device Cloud Proxy locally](https://www.testbirds.com/device-cloud/use-cases-support/documentation-device-cloud/browser-testing-device-cloud-proxy-java-selenium/)
-3. Set `selenide.remote=http://localhost:4444/wd/hub` and optionally extra capabilities in capabilities.json (e.g. `resolution=1920x1080` is provided as an example)
+Cloud providers can be used in this way, too.
+You can use `capabilities.json` to pass extra capabilities for authentication or vendor-specific settings.
 
 ### Setup Report Portal
 
@@ -106,14 +104,16 @@ selenide.browser=chrome
 rp.endpoint=https://web.demo.reportportal.io/
 rp.uuid=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 rp.project=default_personal
+rp.launch=Techstack Test
 rp.tags=chrome;maven
 ```
 
 Some notes:
 * `selenide.remote` is commented; it can be used to utilize a Selenium Grid instead of the local browser
 * `rp.uuid` must be set to the UUID which was copied from the Report Portal user profile or commented to not use Report Portal at all
-* `rp.project` uses the personal project of the demo instance's default user - you need to adjust it if you use a different user
-* `rp.tags` contains some example tags for this build
+* `rp.project` uses the personal project of the demo instance's default user - you need to adjust it if you use a different user (mandatory if rp.uuid is set)
+* `rp.launch` is a name of this launch, e.g. Eclipse, Jenkins Smoke Tests, ... (mandatory if rp.uuid is set)
+* `rp.tags` contains some example tags for this build (tags are optional)
 
 ### Run tests from an IDE
 
@@ -144,10 +144,10 @@ Below is a complete example of VM arguments using Firefox and the Report Portal 
 To do this, Firefox must be installed and the rp.uuid must be replaced with the real one, see [Setup Report Portal](#setup-report-portal).
 
 ```
--ea -Dselenide.baseUrl=http://todomvc.com/examples/react/ -Dselenide.browser=firefox -Drp.endpoint=https://web.demo.reportportal.io/ -Drp.uuid=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx -Drp.project=default_personal -Drp.tags=firefox;eclipse
+-ea -Dselenide.baseUrl=http://todomvc.com/examples/react/ -Dselenide.browser=firefox -Drp.endpoint=https://web.demo.reportportal.io/ -Drp.uuid=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx -Drp.project=default_personal -Drp.launch=Eclipse -Drp.tags=firefox;eclipse
 ```
 
-You can see the results in the JUnit tab on the left (by default) and if you configured it, also in Report Portal.
+You can see the results in the JUnit tab (by default on the left) and if you configured it, also in Report Portal.
 
 ### Run tests with Jenkins pipelines
 

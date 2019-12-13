@@ -19,6 +19,7 @@ Feature: Complete Items
       | 2             |
       | 10            |
 
+  @smoke
   Scenario: Complete one item
     Given I have a todo list with 5 items
     And all items in the todo list are not completed
