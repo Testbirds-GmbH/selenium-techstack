@@ -17,7 +17,7 @@
 		<selenide.version>5.4.1</selenide.version>
 		<cucumber.version>4.7.4</cucumber.version>
 		<slf4j.version>1.7.28</slf4j.version>
-		<logback.version>1.2.3</logback.version>
+		<logback.version>1.2.13</logback.version>
 		<janino.version>3.0.15</janino.version>
 		<reportportalCucumberAgent.version>4.1.0</reportportalCucumberAgent.version>
 		<reportportalLogbackAgent.version>4.0.2</reportportalLogbackAgent.version>
